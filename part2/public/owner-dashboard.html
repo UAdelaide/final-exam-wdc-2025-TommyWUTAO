@@ -120,15 +120,21 @@
 
         async function loadWalks() {
           try {
-            // Get all walk requests for the current user
-            const res = await fetch('/api/walks');
-            const allWalks = await res.json();
+            // Get current user info
+            const userRes = await fetch('/api/users/me');
+            if (!userRes.ok) {
+              throw new Error('Failed to get user information');
+            }
+            const user = await userRes.json();
 
-            // Filter walks to only show those for the current user's dogs
-            const myDogIds = dogs.value.map(dog => dog.dog_id);
-            walks.value = allWalks.filter(walk => myDogIds.includes(walk.dog_id));
+            // Get all walk requests
+            const walksRes = await fetch('/api/walks/owner/' + user.user_id);
+            if (!walksRes.ok) {
+              throw new Error('Failed to load walk requests');
+            }
+            walks.value = await walksRes.json();
           } catch (err) {
-            error.value = 'Failed to load walk requests';
+            error.value = 'Failed to load walk requests: ' + err.message;
           }
         }
 
