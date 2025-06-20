@@ -110,6 +110,8 @@
             const res = await fetch('/api/users/dogs');
             if (res.ok) {
               dogs.value = await res.json();
+              // Load walks after dogs are loaded
+              await loadWalks();
             }
           } catch (err) {
             error.value = 'Failed to load dog list';
@@ -168,7 +170,6 @@
         onMounted(() => {
           checkAuth();
           loadDogs();
-          loadWalks();
         });
 
         return {
