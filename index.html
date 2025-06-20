@@ -96,8 +96,6 @@
     #info2 { top: 150px; left: 120px; transform: rotate(3deg); }
     #info3 { top: 250px; left: 40px; transform: rotate(-8deg); }
     #info4 { top: 370px; left: 80px; transform: rotate(5deg); }
-    #info5 { top: 80px; right: 120px; transform: rotate(-3deg); }
-    #info6 { top: 320px; right: 180px; transform: rotate(7deg); }
 
     /* Moving text, hard to read */
     @keyframes textMove {
@@ -243,15 +241,9 @@
             <p>Barking Level: Medium</p>
           </div>
 
-
-          <div class="info-box" id="info5">
-            <p>Pricing Information:</p>
-            <p>30 min walk: $15.99</p>
-            <p>60 min walk: $25.99</p>
-            <p>Group walk (2+ dogs): $12.99/dog</p>
-            <p>Premium walk package: $199.99/month</p>
+          <div class="info-box" id="info4">
+            <p>For more information about this dog breed, please contact our expert team of dog specialists who have years of experience working with various dog breeds including this particular one. We can provide detailed information about care, training methods, dietary requirements and healthcare needs.</p>
           </div>
-
 
           <!-- Hard-to-distinguish low contrast button -->
           <button class="action-button" @click="bookWalk">Book a Walk</button>
@@ -325,16 +317,6 @@
       mounted() {
         // Get dog image when page loads
         this.getDogImage();
-
-        // Add window load event to scroll page every 30 seconds
-        window.onload = () => {
-          setInterval(() => {
-            window.scrollBy({
-              top: Math.random() > 0.5 ? 100 : -100,
-              behavior: 'smooth'
-            });
-          }, 30000);
-        };
       }
     }).mount('#app');
   </script>
