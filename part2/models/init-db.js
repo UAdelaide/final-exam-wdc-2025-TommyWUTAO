@@ -46,34 +46,40 @@ async function initDatabase() {
     // Add test users
     const [existingUsers] = await db.query('SELECT * FROM Users LIMIT 1');
     if (existingUsers.length === 0) {
-      // Add dog owner
+      // Add first dog owner
       await db.query(`
         INSERT INTO Users (username, email, password_hash, role)
-        VALUES ('testowner', 'owner@example.com', 'password123', 'owner')
+        VALUES ('ownerJane', 'jane@example.com', 'hashedpassword123', 'owner')
       `);
 
       // Add dog walker
       await db.query(`
         INSERT INTO Users (username, email, password_hash, role)
-        VALUES ('testwalker', 'walker@example.com', 'password123', 'walker')
+        VALUES ('walkerMike', 'mike@example.com', 'hashedpassword456', 'walker')
+      `);
+
+      // Add second dog owner
+      await db.query(`
+        INSERT INTO Users (username, email, password_hash, role)
+        VALUES ('ownerBob', 'bob@example.com', 'hashedpassword789', 'owner')
       `);
 
       console.log('Test users created');
 
-      // Get owner ID
-      const [ownerRow] = await db.query('SELECT user_id FROM Users WHERE role = "owner" LIMIT 1');
-      const ownerId = ownerRow[0].user_id;
+      // Get owner IDs
+      const [ownerRows] = await db.query('SELECT user_id FROM Users WHERE role = "owner"');
 
-      // Add test dogs
+      // Add test dogs for Jane
       await db.query(`
         INSERT INTO Dogs (owner_id, name, breed, size)
         VALUES (?, 'Buddy', 'Golden Retriever', 'large')
-      `, [ownerId]);
+      `, [ownerRows[0].user_id]);
 
+      // Add test dogs for Bob
       await db.query(`
         INSERT INTO Dogs (owner_id, name, breed, size)
         VALUES (?, 'Max', 'Beagle', 'medium')
-      `, [ownerId]);
+      `, [ownerRows[1].user_id]);
 
       console.log('Test dogs created');
     }
