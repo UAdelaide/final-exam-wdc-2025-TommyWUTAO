@@ -50,7 +50,7 @@
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                email: this.username, // 使用username作为email
+                email: this.username, // Using username as email
                 password: this.password
               })
             });
@@ -58,20 +58,20 @@
             const data = await response.json();
 
             if (!response.ok) {
-              this.error = data.error || '登录失败';
+              this.error = data.error || 'Login failed';
               return;
             }
 
-            // 根据用户角色重定向
+            // Redirect based on user role
             if (data.user.role === 'owner') {
               window.location.href = 'owner-dashboard.html';
             } else if (data.user.role === 'walker') {
               window.location.href = 'walker-dashboard.html';
             } else {
-              this.error = '未知用户角色';
+              this.error = 'Unknown user role';
             }
           } catch (err) {
-            this.error = '登录请求失败';
+            this.error = 'Login request failed';
             console.error(err);
           }
         }
