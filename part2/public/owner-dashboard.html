@@ -8,60 +8,103 @@
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body class="bg-light">
-  <div id="app" class="container py-4">
-    <h1 class="mb-4 text-primary">Owner Dashboard</h1>
 
-    <!-- Walk request form -->
-    <div class="card mb-4">
-      <div class="card-header bg-primary text-white">
-        Create New Walk Request
-      </div>
-      <div class="card-body">
-        <form @submit.prevent="submitWalkRequest">
-          <div class="mb-3">
-            <label class="form-label">Dog ID</label>
-            <input v-model="form.dog_id" type="number" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Requested Date & Time</label>
-            <input v-model="form.requested_time" type="datetime-local" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Duration (minutes)</label>
-            <input v-model="form.duration_minutes" type="number" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Location</label>
-            <input v-model="form.location" type="text" class="form-control" required>
-          </div>
-          <button type="submit" class="btn btn-success">Create Walk</button>
-        </form>
+  <div id="app" class="container py-4">
+    <div v-if="loading" class="text-center">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
     </div>
 
-    <!-- Success or error messages -->
-    <div v-if="message" class="alert alert-info">{{ message }}</div>
-    <div v-if="error" class="alert alert-danger">{{ error }}</div>
+    <div v-else-if="!user" class="text-center">
+      <div class="alert alert-warning">
+        <h3>You are not logged in or not authorized</h3>
+        <p>Please <a href="/" class="alert-link">login</a> to access this page.</p>
+      </div>
+    </div>
 
-    <!-- List of walk requests -->
-    <h2 class="mb-3">My Walk Requests</h2>
-    <div class="row" v-if="walks.length > 0">
-      <div class="col-md-6 mb-4" v-for="walk in walks" :key="walk.request_id">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Request #{{ walk.request_id }}</h5>
-            <p class="card-text">
-              <strong>Dog:</strong> {{ walk.dog_name }} ({{ walk.size }})<br>
-              <strong>Date:</strong> {{ new Date(walk.requested_time).toLocaleString() }}<br>
-              <strong>Duration:</strong> {{ walk.duration_minutes }} minutes<br>
-              <strong>Location:</strong> {{ walk.location }}<br>
-              <strong>Status:</strong> {{ walk.status }}
-            </p>
+    <div v-else>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Owner Dashboard</h1>
+        <div>
+          <span class="me-3">Welcome, {{ user.username }}</span>
+          <button @click="logout" class="btn btn-outline-danger">Logout</button>
+        </div>
+      </div>
+
+      <!-- Original dashboard content goes here -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              <h2 class="h5 mb-0">Create Walk Request</h2>
+            </div>
+            <div class="card-body">
+              <!-- Walk request form -->
+              <form @submit.prevent="createWalkRequest">
+                <!-- Form inputs would go here -->
+                <div class="mb-3">
+                  <label for="dogName" class="form-label">Dog Name</label>
+                  <input type="text" class="form-control" id="dogName" v-model="walkRequest.dogName" required>
+                </div>
+                <div class="mb-3">
+                  <label for="walkDate" class="form-label">Date</label>
+                  <input type="date" class="form-control" id="walkDate" v-model="walkRequest.date" required>
+                </div>
+                <div class="mb-3">
+                  <label for="walkTime" class="form-label">Time</label>
+                  <input type="time" class="form-control" id="walkTime" v-model="walkRequest.time" required>
+                </div>
+                <div class="mb-3">
+                  <label for="duration" class="form-label">Duration (minutes)</label>
+                  <input type="number" class="form-control" id="duration" v-model="walkRequest.duration" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Request</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header bg-success text-white">
+              <h2 class="h5 mb-0">My Walk Requests</h2>
+            </div>
+            <div class="card-body">
+              <div v-if="walks.length === 0" class="text-center py-3">
+                <p>No walk requests found</p>
+              </div>
+              <ul v-else class="list-group">
+                <li v-for="walk in walks" :key="walk.id" class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h5>{{ walk.dog_name }}</h5>
+                      <div>Date: {{ formatDate(walk.walk_date) }}</div>
+                      <div>Time: {{ walk.walk_time }}</div>
+                      <div>Duration: {{ walk.duration }} minutes</div>
+                      <div>Status:
+                        <span :class="getStatusClass(walk.status)">
+                          {{ walk.status }}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <button
+                        v-if="walk.status === 'pending'"
+                        @click="deleteWalk(walk.walk_id)"
+                        class="btn btn-sm btn-danger"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <p v-else>No walk requests yet.</p>
   </div>
 
   <script>
@@ -69,62 +112,140 @@
 
     createApp({
       setup() {
-        const form = ref({
-          dog_id: '',
-          requested_time: '',
-          duration_minutes: '',
-          location: ''
+        const user = ref(null);
+        const loading = ref(true);
+        const walks = ref([]);
+        const walkRequest = ref({
+          dogName: '',
+          date: '',
+          time: '',
+          duration: 30
         });
 
-        const walks = ref([]);
-        const message = ref('');
-        const error = ref('');
-
-        async function loadWalks() {
+        async function checkAuth() {
           try {
-            const res = await fetch('/api/walks');
-            walks.value = await res.json();
+            const response = await fetch('/api/users/me');
+            if (!response.ok) {
+              throw new Error('Not authenticated');
+            }
+            const userData = await response.json();
+            if (userData.role !== 'owner') {
+              throw new Error('Not authorized as owner');
+            }
+            user.value = userData;
+            fetchWalks();
           } catch (err) {
-            error.value = 'Failed to load walk requests';
+            user.value = null;
+          } finally {
+            loading.value = false;
           }
         }
 
-        async function submitWalkRequest() {
+        async function fetchWalks() {
           try {
-            const res = await fetch('/api/walks', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(form.value)
-            });
-            const result = await res.json();
-
-            if (!res.ok) throw new Error(result.error || 'Error submitting walk request');
-
-            message.value = result.message;
-            error.value = '';
-            form.value = {
-              dog_id: '',
-              requested_time: '',
-              duration_minutes: '',
-              location: ''
-            };
-            loadWalks();
+            const response = await fetch(`/api/walks/owner/${user.value.user_id}`);
+            if (!response.ok) {
+              throw new Error('Failed to fetch walks');
+            }
+            walks.value = await response.json();
           } catch (err) {
-            error.value = err.message;
-            message.value = '';
+            console.error('Error fetching walks:', err);
+          }
+        }
+
+        async function createWalkRequest() {
+          try {
+            const response = await fetch('/api/walks', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                owner_id: user.value.user_id,
+                dog_name: walkRequest.value.dogName,
+                walk_date: walkRequest.value.date,
+                walk_time: walkRequest.value.time,
+                duration: walkRequest.value.duration,
+                status: 'pending'
+              })
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to create walk request');
+            }
+
+            // Clear form and refresh walks
+            walkRequest.value = {
+              dogName: '',
+              date: '',
+              time: '',
+              duration: 30
+            };
+
+            fetchWalks();
+          } catch (err) {
+            console.error('Error creating walk request:', err);
+          }
+        }
+
+        async function deleteWalk(walkId) {
+          if (!confirm('Are you sure you want to cancel this walk request?')) {
+            return;
+          }
+
+          try {
+            const response = await fetch(`/api/walks/${walkId}`, {
+              method: 'DELETE'
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to delete walk request');
+            }
+
+            fetchWalks();
+          } catch (err) {
+            console.error('Error deleting walk request:', err);
+          }
+        }
+
+        function formatDate(dateString) {
+          const date = new Date(dateString);
+          return date.toLocaleDateString();
+        }
+
+        function getStatusClass(status) {
+          switch (status) {
+            case 'pending': return 'text-warning';
+            case 'accepted': return 'text-success';
+            case 'completed': return 'text-primary';
+            case 'cancelled': return 'text-danger';
+            default: return '';
+          }
+        }
+
+        async function logout() {
+          try {
+            await fetch('/api/users/logout', { method: 'POST' });
+            window.location.href = '/';
+          } catch (err) {
+            console.error('Logout error:', err);
           }
         }
 
         onMounted(() => {
-          loadWalks();
+          checkAuth();
         });
 
         return {
-          form,
+          user,
+          loading,
           walks,
-          message,
-          error,
-          submitWalkRequest
+          walkRequest,
+          createWalkRequest,
+          deleteWalk,
+          formatDate,
+          getStatusClass,
+          logout
         };
       }
     }).mount('#app');
