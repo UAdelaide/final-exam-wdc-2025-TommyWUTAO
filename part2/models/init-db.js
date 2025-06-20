@@ -2,7 +2,7 @@ const db = require('./db');
 
 async function initDatabase() {
   try {
-    // 创建用户表
+    // Create users table
     await db.query(`
       CREATE TABLE IF NOT EXISTS Users (
         user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -14,7 +14,7 @@ async function initDatabase() {
       )
     `);
 
-    // 创建狗表
+    // Create dogs table
     await db.query(`
       CREATE TABLE IF NOT EXISTS Dogs (
         dog_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -27,7 +27,7 @@ async function initDatabase() {
       )
     `);
 
-    // 创建步行请求表
+    // Create walk requests table
     await db.query(`
       CREATE TABLE IF NOT EXISTS WalkRequests (
         request_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -43,28 +43,28 @@ async function initDatabase() {
       )
     `);
 
-    // 添加测试用户
+    // Add test users
     const [existingUsers] = await db.query('SELECT * FROM Users LIMIT 1');
     if (existingUsers.length === 0) {
-      // 添加狗主人
+      // Add dog owner
       await db.query(`
         INSERT INTO Users (username, email, password_hash, role)
         VALUES ('testowner', 'owner@example.com', 'password123', 'owner')
       `);
 
-      // 添加遛狗人
+      // Add dog walker
       await db.query(`
         INSERT INTO Users (username, email, password_hash, role)
         VALUES ('testwalker', 'walker@example.com', 'password123', 'walker')
       `);
 
-      console.log('测试用户已创建');
+      console.log('Test users created');
 
-      // 获取狗主人ID
+      // Get owner ID
       const [ownerRow] = await db.query('SELECT user_id FROM Users WHERE role = "owner" LIMIT 1');
       const ownerId = ownerRow[0].user_id;
 
-      // 添加测试狗
+      // Add test dogs
       await db.query(`
         INSERT INTO Dogs (owner_id, name, breed, size)
         VALUES (?, 'Buddy', 'Golden Retriever', 'large')
@@ -75,12 +75,12 @@ async function initDatabase() {
         VALUES (?, 'Max', 'Beagle', 'medium')
       `, [ownerId]);
 
-      console.log('测试狗已创建');
+      console.log('Test dogs created');
     }
 
-    console.log('数据库初始化完成');
+    console.log('Database initialization complete');
   } catch (error) {
-    console.error('数据库初始化失败:', error);
+    console.error('Database initialization failed:', error);
   } finally {
     process.exit();
   }
