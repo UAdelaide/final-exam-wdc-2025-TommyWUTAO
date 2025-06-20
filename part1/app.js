@@ -19,20 +19,17 @@ async function initializeDatabase() {
   try {
     const sqlFilePath = path.join(__dirname, 'dogwalks.sql');
     const sqlScript = fs.readFileSync(sqlFilePath, 'utf8');
-
     const sqlStatements = sqlScript.split(';').filter(statement => statement.trim());
-
     const connection = await pool.getConnection();
 
-    // 执行每一条SQL语句
     for (const statement of sqlStatements) {
       if (statement.trim()) {
         await connection.query(`${statement.trim()};`);
       }
     }
-    console.log('数据库初始化成功');
+    console.log('dā');
 
-    // 插入测试数据
+
     await insertTestData(connection);
 
     // 释放连接
