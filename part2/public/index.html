@@ -11,10 +11,23 @@
 
   <div id="app" class="container py-5">
     <h1 class="mb-4 text-primary">{{ message }}</h1>
-    <p class="lead">Connect with trusted walkers for your beloved dog!</p>
 
-    <a href="owner-dashboard.html" class="btn btn-outline-primary me-2">Owner Dashboard</a>
-    <a href="walker-dashboard.html" class="btn btn-outline-success">Walker Dashboard</a>
+    <div class="card shadow-sm mx-auto" style="max-width: 400px;">
+      <div class="card-body">
+        <form @submit.prevent="login">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" v-model="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" v-model="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Log In</button>
+        </form>
+        <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -22,8 +35,46 @@
     createApp({
       data() {
         return {
-          message: 'Welcome to the Dog Walking Service!'
+          message: 'Welcome to the Dog Walking Service!',
+          username: '',
+          password: '',
+          error: ''
         };
+      },
+      methods: {
+        async login() {
+          try {
+            const response = await fetch('/api/users/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                email: this.username, // 使用username作为email
+                password: this.password
+              })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              this.error = data.error || '登录失败';
+              return;
+            }
+
+            // 根据用户角色重定向
+            if (data.user.role === 'owner') {
+              window.location.href = 'owner-dashboard.html';
+            } else if (data.user.role === 'walker') {
+              window.location.href = 'walker-dashboard.html';
+            } else {
+              this.error = '未知用户角色';
+            }
+          } catch (err) {
+            this.error = '登录请求失败';
+            console.error(err);
+          }
+        }
       }
     }).mount('#app');
   </script>
