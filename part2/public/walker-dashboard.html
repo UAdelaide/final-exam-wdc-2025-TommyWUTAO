@@ -48,14 +48,27 @@
         const error = ref('');
         const userId = ref(null);
 
-        async function checkAuth() {
+        async function getCurrentUser() {
           try {
             const res = await fetch('/api/users/me');
             if (!res.ok) {
+              throw new Error('Failed to get current user');
+            }
+            const user = await res.json();
+            return user;
+          } catch (err) {
+            error.value = err.message;
+            return null;
+          }
+        }
+
+        async function checkAuth() {
+          try {
+            const user = await getCurrentUser();
+            if (!user) {
               window.location.href = 'index.html';
               return;
             }
-            const user = await res.json();
             if (user.role !== 'walker') {
               window.location.href = 'index.html';
               return;
@@ -78,10 +91,16 @@
 
         async function applyToWalk(requestId) {
           try {
+            const user = await getCurrentUser();
+            if (!user) {
+              error.value = 'User not authenticated';
+              return;
+            }
+
             const res = await fetch(`/api/walks/${requestId}/apply`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ walker_id: userId.value })
+              body: JSON.stringify({ walker_id: user.user_id })
             });
             const result = await res.json();
 
