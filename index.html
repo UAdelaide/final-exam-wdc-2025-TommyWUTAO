@@ -4,7 +4,7 @@
   <title>DOg wAlKing SErViCe</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    /* 极低对比度文本 */
+    /* Very low contrast text */
     body {
       background-color: #f9f9f9;
       color: #dddddd;
@@ -14,7 +14,7 @@
       cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="5" fill="red"/></svg>'), auto;
     }
 
-    /* 随机变化的背景颜色 - 会分散注意力 */
+    /* Randomly changing background color - distracting */
     @keyframes colorChange {
       0% { background-color: #f9f9f9; }
       25% { background-color: #f0f0ff; }
@@ -28,7 +28,7 @@
       padding: 10px;
     }
 
-    /* 完全不同的字体混合使用 */
+    /* Completely different font mix */
     h1 {
       font-family: "Times New Roman", serif;
       color: #ddaa11;
@@ -40,19 +40,19 @@
       transform: skew(-5deg);
     }
 
-    /* 过度靠近页面边缘 */
+    /* Too close to page edges */
     .main-content {
       margin: 2px;
       padding-right: 80vw;
     }
 
-    /* 不合理的内容排布 */
+    /* Poor content layout */
     .dog-display {
       position: relative;
       height: 90vh;
     }
 
-    /* 难以点击的小按钮 */
+    /* Tiny, hard-to-click button */
     .tiny-button {
       width: 10px;
       height: 10px;
@@ -63,7 +63,7 @@
       top: 5px;
     }
 
-    /* 闪烁的图片边框 */
+    /* Flashing image border */
     @keyframes borderBlink {
       0% { border: 3px solid red; }
       50% { border: 3px solid yellow; }
@@ -80,7 +80,7 @@
       object-fit: cover;
     }
 
-    /* 过多信息且混乱排布 */
+    /* Too much information and chaotic arrangement */
     .info-box {
       position: absolute;
       width: 180px;
@@ -99,7 +99,7 @@
     #info5 { top: 80px; right: 120px; transform: rotate(-3deg); }
     #info6 { top: 320px; right: 180px; transform: rotate(7deg); }
 
-    /* 会移动的文本，难以阅读 */
+    /* Moving text, hard to read */
     @keyframes textMove {
       0% { transform: translateX(0); }
       50% { transform: translateX(20px); }
@@ -111,7 +111,7 @@
       display: inline-block;
     }
 
-    /* 无意义的动画元素 */
+    /* Meaningless animated elements */
     .floating-element {
       position: fixed;
       width: 50px;
@@ -133,7 +133,7 @@
       100% { transform: translate(0, 0) rotate(360deg); }
     }
 
-    /* 表单样式 - 元素相距太远 */
+    /* Form styling - elements too far apart */
     .form-container {
       margin-top: 50px;
     }
@@ -148,7 +148,7 @@
       font-size: 10px;
     }
 
-    /* 超低对比度按钮 */
+    /* Ultra-low contrast button */
     .action-button {
       background-color: #f8f8f8;
       color: #eeeeee;
@@ -159,18 +159,18 @@
       right: 30px;
     }
 
-    /* 过度的文本阴影使文本难以阅读 */
+    /* Excessive text shadow makes text hard to read */
     .shadow-text {
       text-shadow: 5px 5px 5px #000, -5px -5px 5px #000,
                   5px -5px 5px #000, -5px 5px 5px #000;
     }
 
-    /* 没有焦点指示器 */
+    /* No focus indicators */
     *:focus {
       outline: none;
     }
 
-    /* 每两秒闪烁一次的元素 - 可能导致癫痫 */
+    /* Element flashing every 0.3 seconds - can cause seizures */
     @keyframes flash {
       0% { opacity: 1; }
       49% { opacity: 1; }
@@ -188,7 +188,7 @@
       top: 10px;
     }
 
-    /* 折叠的页脚在屏幕底部 */
+    /* Collapsed footer at bottom of screen */
     footer {
       position: absolute;
       bottom: -35px;
@@ -207,24 +207,24 @@
 </head>
 <body>
   <div id="app">
-    <!-- 没有语义HTML结构 -->
+    <!-- No semantic HTML structure -->
     <div class="container">
-      <!-- 使用全大写标题 - 可读性差 -->
+      <!-- Using all caps title - poor readability -->
       <h1>AMAZING DOG WALKING SERVICE!!!</h1>
 
       <div class="flash">NEW! HOT DEALS!</div>
 
       <div class="main-content">
         <div class="dog-display">
-          <!-- 没有alt标签的图片 -->
+          <!-- Image without alt tag -->
           <div class="dog-image">
             <img v-if="dogImage" :src="dogImage">
           </div>
 
-          <!-- 太小难以点击的按钮 -->
+          <!-- Button too small to click easily -->
           <div class="tiny-button" @click="getDogImage" title="Get New Dog"></div>
 
-          <!-- 随机散落的信息框，过多信息 -->
+          <!-- Randomly scattered info boxes, too much information -->
           <div class="info-box" id="info1">
             <p><span class="moving-text">Dog Breed:</span> <span class="shadow-text">{{ dogBreed }}</span></p>
             <p>Temperament: Friendly, Active, Playful, Energetic, Curious</p>
@@ -259,11 +259,11 @@
             <p>IMPORTANT NOTICE: All new customers must sign up before June 30th to receive our special discount. Terms and conditions apply. Not valid with other offers. Restrictions may apply depending on location, weather conditions, dog behavior assessment and walker availability.</p>
           </div>
 
-          <!-- 难以区分的低对比度按钮 -->
+          <!-- Hard-to-distinguish low contrast button -->
           <button class="action-button" @click="bookWalk">Book a Walk</button>
         </div>
 
-        <!-- 表单元素分散且没有适当组织结构 -->
+        <!-- Form elements scattered without proper structure -->
         <div class="form-container">
           <input type="text" id="name" autocomplete="off">
           <label for="email">Your Email</label>
@@ -281,19 +281,19 @@
       </div>
     </div>
 
-    <!-- 无意义的浮动元素 -->
+    <!-- Meaningless floating elements -->
     <div class="floating-element" id="float1"></div>
     <div class="floating-element" id="float2"></div>
     <div class="floating-element" id="float3"></div>
 
-    <!-- 隐藏的页脚需要悬停才显示 -->
+    <!-- Hidden footer requires hover -->
     <footer>
       Important contact and copyright information hidden here
     </footer>
   </div>
 
   <script>
-    // Vue应用
+    // Vue application
     const { createApp } = Vue;
 
     createApp({
@@ -312,7 +312,7 @@
             const data = await response.json();
             this.dogImage = data.message;
 
-            // 从URL中提取狗品种
+            // Extract dog breed from URL
             const urlParts = data.message.split('/');
             if (urlParts.length > 4) {
               this.dogBreed = urlParts[4].charAt(0).toUpperCase() + urlParts[4].slice(1);
@@ -324,15 +324,15 @@
           }
         },
         bookWalk() {
-          // 没有表单验证，也没有提示信息
+          // No form validation, no informative messages
           alert('System error! Please try again!');
         }
       },
       mounted() {
-        // 页面加载时获取狗狗图片
+        // Get dog image when page loads
         this.getDogImage();
 
-        // 添加窗口加载完成事件，让页面每隔30秒自动滚动
+        // Add window load event to scroll page every 30 seconds
         window.onload = () => {
           setInterval(() => {
             window.scrollBy({
