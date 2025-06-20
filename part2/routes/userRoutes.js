@@ -58,4 +58,14 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// 添加登出路由
+router.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ error: '登出失败' });
+    }
+    res.json({ message: '登出成功' });
+  });
+});
+
 module.exports = router;
