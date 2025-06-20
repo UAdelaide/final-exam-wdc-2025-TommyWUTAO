@@ -27,15 +27,13 @@ async function initializeDatabase() {
         await connection.query(`${statement.trim()};`);
       }
     }
-    console.log('dā');
-
+    console.log('database initialized');
 
     await insertTestData(connection);
 
-    // 释放连接
     connection.release();
   } catch (err) {
-    console.error('数据库初始化失败:', err);
+    console.error('database initialization failed:', err);
     process.exit(1);
   }
 }
