@@ -6,7 +6,6 @@ const path = require('path');
 const app = express();
 const port = 8080;
 
-// 创建数据库连接池
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
@@ -16,17 +15,13 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-// 初始化数据库函数
 async function initializeDatabase() {
   try {
-    // 读取SQL文件内容
     const sqlFilePath = path.join(__dirname, 'dogwalks.sql');
     const sqlScript = fs.readFileSync(sqlFilePath, 'utf8');
 
-    // 分割SQL语句
     const sqlStatements = sqlScript.split(';').filter(statement => statement.trim());
 
-    // 创建连接
     const connection = await pool.getConnection();
 
     // 执行每一条SQL语句
