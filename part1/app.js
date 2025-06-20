@@ -6,6 +6,7 @@ const path = require('path');
 const app = express();
 const port = 8080;
 
+// Create database connection pool
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
@@ -15,29 +16,6 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 });
-
-async function initializeDatabase() {
-  try {
-    const sqlFilePath = path.join(__dirname, 'dogwalks.sql');
-    const sqlScript = fs.readFileSync(sqlFilePath, 'utf8');
-    const sqlStatements = sqlScript.split(';').filter(statement => statement.trim());
-    const connection = await pool.getConnection();
-
-    for (const statement of sqlStatements) {
-      if (statement.trim()) {
-        await connection.query(`${statement.trim()};`);
-      }
-    }
-    console.log('Database initialized');
-
-    await insertTestData(connection);
-
-    connection.release();
-  } catch (err) {
-    console.error('Database initialization failed:', err);
-    process.exit(1);
-  }
-}
 
 // Insert test data function
 async function insertTestData(connection) {
@@ -58,7 +36,7 @@ async function insertTestData(connection) {
     // Get user IDs
     const [users] = await connection.query('SELECT user_id, username FROM Users');
     const userMap = {};
-    users.forEach(user => {
+    users.forEach((user) => {
       userMap[user.username] = user.user_id;
     });
 
@@ -78,7 +56,7 @@ async function insertTestData(connection) {
     // Get dog IDs
     const [dogs] = await connection.query('SELECT dog_id, name, owner_id FROM Dogs');
     const dogMap = {};
-    dogs.forEach(dog => {
+    dogs.forEach((dog) => {
       dogMap[dog.name] = dog.dog_id;
     });
 
@@ -127,6 +105,38 @@ async function insertTestData(connection) {
   } catch (err) {
     console.error('Test data insertion failed:', err);
     throw err;
+  }
+}
+
+// Initialize database function
+async function initializeDatabase() {
+  try {
+    // Read SQL file content
+    const sqlFilePath = path.join(__dirname, 'dogwalks.sql');
+    const sqlScript = fs.readFileSync(sqlFilePath, 'utf8');
+
+    // Split SQL statements
+    const sqlStatements = sqlScript.split(';').filter((statement) => statement.trim());
+
+    // Create connection
+    const connection = await pool.getConnection();
+
+    // Execute each SQL statement
+    for (const statement of sqlStatements) {
+      if (statement.trim()) {
+        await connection.query(`${statement.trim()};`);
+      }
+    }
+    console.log('Database initialized');
+
+    // Insert test data
+    await insertTestData(connection);
+
+    // Release connection
+    connection.release();
+  } catch (err) {
+    console.error('Database initialization failed:', err);
+    process.exit(1);
   }
 }
 
