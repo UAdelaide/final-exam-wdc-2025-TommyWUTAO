@@ -49,7 +49,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // 保存用户信息到会话
+    // Save user info to session
     req.session.user = rows[0];
 
     res.json({ message: 'Login successful', user: rows[0] });
@@ -58,20 +58,20 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// 添加登出路由
+// Add logout route
 router.post('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      return res.status(500).json({ error: '登出失败' });
+      return res.status(500).json({ error: 'Logout failed' });
     }
-    res.json({ message: '登出成功' });
+    res.json({ message: 'Logout successful' });
   });
 });
 
-// 获取当前用户的狗列表
+// Get current user's dog list
 router.get('/dogs', async (req, res) => {
   if (!req.session.user) {
-    return res.status(401).json({ error: '未登录' });
+    return res.status(401).json({ error: 'Not logged in' });
   }
 
   try {
@@ -82,7 +82,7 @@ router.get('/dogs', async (req, res) => {
 
     res.json(rows);
   } catch (error) {
-    res.status(500).json({ error: '获取狗列表失败' });
+    res.status(500).json({ error: 'Failed to fetch dog list' });
   }
 });
 
