@@ -9,30 +9,105 @@
 </head>
 <body class="bg-light">
   <div id="app" class="container py-4">
-    <h1 class="mb-4 text-success">Walker Dashboard</h1>
+    <div v-if="loading" class="text-center">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
 
-    <!-- Alert messages -->
-    <div v-if="message" class="alert alert-info">{{ message }}</div>
-    <div v-if="error" class="alert alert-danger">{{ error }}</div>
+    <div v-else-if="!user" class="text-center">
+      <div class="alert alert-warning">
+        <h3>您没有登录或没有权限</h3>
+        <p>请<a href="/" class="alert-link">登录</a>以访问此页面。</p>
+      </div>
+    </div>
 
-    <!-- Walk requests list -->
-    <div v-if="walks.length > 0" class="row">
-      <div class="col-md-6 mb-4" v-for="walk in walks" :key="walk.request_id">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Walk for {{ walk.dog_name }} ({{ walk.size }})</h5>
-            <p class="card-text">
-              <strong>Date:</strong> {{ new Date(walk.requested_time).toLocaleString() }}<br>
-              <strong>Duration:</strong> {{ walk.duration_minutes }} minutes<br>
-              <strong>Location:</strong> {{ walk.location }}<br>
-              <strong>Owner:</strong> {{ walk.owner_name }}
-            </p>
-            <button type=button class="btn btn-outline-success" @click="applyToWalk(walk.request_id)">Apply</button>
+    <div v-else>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Walker Dashboard</h1>
+        <div>
+          <span class="me-3">Welcome, {{ user.username }}</span>
+          <button type="button" @click="logout" class="btn btn-outline-danger">Logout</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Available Walk Requests -->
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              <h2 class="h5 mb-0">Open Walk Requests</h2>
+            </div>
+            <div class="card-body">
+              <div v-if="openWalks.length === 0" class="text-center py-3">
+                <p>No open walk requests available</p>
+              </div>
+              <ul v-else class="list-group">
+                <li v-for="walk in openWalks" :key="walk.walk_id" class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h5>{{ walk.dog_name }}</h5>
+                      <div>Date: {{ formatDate(walk.walk_date) }}</div>
+                      <div>Time: {{ walk.walk_time }}</div>
+                      <div>Duration: {{ walk.duration }} minutes</div>
+                    </div>
+                    <div>
+                      <button
+                        type="button"
+                        @click="acceptWalk(walk.walk_id)"
+                        class="btn btn-sm btn-success"
+                      >
+                        Accept
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Walks -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header bg-success text-white">
+              <h2 class="h5 mb-0">My Walks</h2>
+            </div>
+            <div class="card-body">
+              <div v-if="myWalks.length === 0" class="text-center py-3">
+                <p>You haven't accepted any walks yet</p>
+              </div>
+              <ul v-else class="list-group">
+                <li v-for="walk in myWalks" :key="walk.walk_id" class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h5>{{ walk.dog_name }}</h5>
+                      <div>Date: {{ formatDate(walk.walk_date) }}</div>
+                      <div>Time: {{ walk.walk_time }}</div>
+                      <div>Duration: {{ walk.duration }} minutes</div>
+                      <div>Status:
+                        <span :class="getStatusClass(walk.status)">
+                          {{ walk.status }}
+                        </span>
+                      </div>
+                    </div>
+                    <div v-if="walk.status === 'accepted'">
+                      <button
+                        type="button"
+                        @click="markCompleted(walk.walk_id)"
+                        class="btn btn-sm btn-primary"
+                      >
+                        Mark Completed
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <p v-else>No available walk requests at the moment.</p>
   </div>
 
   <script>
@@ -40,49 +115,124 @@
 
     createApp({
       setup() {
-        const walks = ref([]);
-        const message = ref('');
-        const error = ref('');
-        const user = 3;
+        const user = ref(null);
+        const loading = ref(true);
+        const openWalks = ref([]);
+        const myWalks = ref([]);
 
-        async function loadWalkRequests() {
+        async function checkAuth() {
           try {
-            const res = await fetch('/api/walks');
-            if (!res.ok) throw new Error('Failed to load walk requests');
-            walks.value = await res.json();
+            const response = await fetch('/api/users/me');
+            if (!response.ok) {
+              throw new Error('Not authenticated');
+            }
+            const userData = await response.json();
+            if (userData.role !== 'walker') {
+              throw new Error('Not authorized as walker');
+            }
+            user.value = userData;
+            fetchWalks();
           } catch (err) {
-            error.value = err.message;
+            user.value = null;
+          } finally {
+            loading.value = false;
           }
         }
 
-        async function applyToWalk(requestId) {
+        async function fetchWalks() {
           try {
-            const res = await fetch(`/api/walks/${requestId}/apply`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ walker_id: user })
-            });
-            const result = await res.json();
+            // Fetch open walk requests
+            const openResponse = await fetch('/api/walks/open');
+            if (openResponse.ok) {
+              openWalks.value = await openResponse.json();
+            }
 
-            if (!res.ok) throw new Error(result.error || 'Application failed');
-            message.value = result.message;
-            error.value = '';
-            await loadWalkRequests();
+            // Fetch my walks
+            const myResponse = await fetch(`/api/walks/walker/${user.value.user_id}`);
+            if (myResponse.ok) {
+              myWalks.value = await myResponse.json();
+            }
           } catch (err) {
-            error.value = err.message;
-            message.value = '';
+            console.error('Error fetching walks:', err);
+          }
+        }
+
+        async function acceptWalk(walkId) {
+          try {
+            const response = await fetch(`/api/walks/${walkId}/accept`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                walker_id: user.value.user_id
+              })
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to accept walk');
+            }
+
+            fetchWalks();
+          } catch (err) {
+            console.error('Error accepting walk:', err);
+          }
+        }
+
+        async function markCompleted(walkId) {
+          try {
+            const response = await fetch(`/api/walks/${walkId}/complete`, {
+              method: 'PUT'
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to mark walk as completed');
+            }
+
+            fetchWalks();
+          } catch (err) {
+            console.error('Error updating walk status:', err);
+          }
+        }
+
+        function formatDate(dateString) {
+          const date = new Date(dateString);
+          return date.toLocaleDateString();
+        }
+
+        function getStatusClass(status) {
+          switch (status) {
+            case 'pending': return 'text-warning';
+            case 'accepted': return 'text-success';
+            case 'completed': return 'text-primary';
+            case 'cancelled': return 'text-danger';
+            default: return '';
+          }
+        }
+
+        async function logout() {
+          try {
+            await fetch('/api/users/logout', { method: 'POST' });
+            window.location.href = '/';
+          } catch (err) {
+            console.error('Logout error:', err);
           }
         }
 
         onMounted(() => {
-          loadWalkRequests();
+          checkAuth();
         });
 
         return {
-          walks,
-          message,
-          error,
-          applyToWalk
+          user,
+          loading,
+          openWalks,
+          myWalks,
+          acceptWalk,
+          markCompleted,
+          formatDate,
+          getStatusClass,
+          logout
         };
       }
     }).mount('#app');
