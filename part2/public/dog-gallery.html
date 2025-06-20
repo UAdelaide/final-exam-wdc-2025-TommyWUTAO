@@ -37,7 +37,7 @@
     <div v-if="!loading && dogs.length > 0" class="row">
       <div class="col-md-4 mb-4" v-for="dog in dogs" :key="dog.dog_id">
         <div class="card h-100">
-          <img :src="dog.imageUrl" class="dog-image card-img-top" alt="Dog image">
+          <img :src="dog.imageUrl" class="dog-image card-img-top" alt="Dog image" src="https://via.placeholder.com/300x200?text=Loading...">
           <div class="card-body">
             <h5 class="card-title">{{ dog.name }}</h5>
             <p class="card-text">
