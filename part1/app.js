@@ -169,7 +169,7 @@ app.get('/api/dogs', async (req, res) => {
   }
 });
 
-// API route - Open walk requests
+// API route
 app.get('/api/walkrequests/open', async (req, res) => {
   try {
     const [rows] = await pool.query(`
@@ -187,7 +187,7 @@ app.get('/api/walkrequests/open', async (req, res) => {
   }
 });
 
-// API route 
+
 app.get('/api/walkers/summary', async (req, res) => {
   try {
     const [rows] = await pool.query(`
