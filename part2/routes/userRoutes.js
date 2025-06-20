@@ -68,4 +68,22 @@ router.post('/logout', (req, res) => {
   });
 });
 
+// 获取当前用户的狗列表
+router.get('/dogs', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: '未登录' });
+  }
+
+  try {
+    const [rows] = await db.query(`
+      SELECT * FROM Dogs
+      WHERE owner_id = ?
+    `, [req.session.user.user_id]);
+
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: '获取狗列表失败' });
+  }
+});
+
 module.exports = router;
