@@ -9,7 +9,10 @@
 </head>
 <body class="bg-light">
   <div id="app" class="container py-4">
-    <h1 class="mb-4 text-success">Walker Dashboard</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="text-success">Walker Dashboard</h1>
+      <button type="button" @click="logout" class="btn btn-outline-danger">登出</button>
+    </div>
 
     <!-- Alert messages -->
     <div v-if="message" class="alert alert-info">{{ message }}</div>
@@ -27,7 +30,7 @@
               <strong>Location:</strong> {{ walk.location }}<br>
               <strong>Owner:</strong> {{ walk.owner_name }}
             </p>
-            <button type=button class="btn btn-outline-success" @click="applyToWalk(walk.request_id)">Apply</button>
+            <button type="button" class="btn btn-outline-success" @click="applyToWalk(walk.request_id)">Apply</button>
           </div>
         </div>
       </div>
@@ -43,7 +46,25 @@
         const walks = ref([]);
         const message = ref('');
         const error = ref('');
-        const user = 3;
+        const userId = ref(null);
+
+        async function checkAuth() {
+          try {
+            const res = await fetch('/api/users/me');
+            if (!res.ok) {
+              window.location.href = 'index.html';
+              return;
+            }
+            const user = await res.json();
+            if (user.role !== 'walker') {
+              window.location.href = 'index.html';
+              return;
+            }
+            userId.value = user.user_id;
+          } catch (err) {
+            window.location.href = 'index.html';
+          }
+        }
 
         async function loadWalkRequests() {
           try {
@@ -60,7 +81,7 @@
             const res = await fetch(`/api/walks/${requestId}/apply`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ walker_id: user })
+              body: JSON.stringify({ walker_id: userId.value })
             });
             const result = await res.json();
 
@@ -74,7 +95,17 @@
           }
         }
 
+        async function logout() {
+          try {
+            await fetch('/api/users/logout', { method: 'POST' });
+            window.location.href = 'index.html';
+          } catch (err) {
+            error.value = '登出失败';
+          }
+        }
+
         onMounted(() => {
+          checkAuth();
           loadWalkRequests();
         });
 
@@ -82,7 +113,8 @@
           walks,
           message,
           error,
-          applyToWalk
+          applyToWalk,
+          logout
         };
       }
     }).mount('#app');
