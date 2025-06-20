@@ -187,7 +187,7 @@ app.get('/api/walkrequests/open', async (req, res) => {
   }
 });
 
-// API route - Walkers summary
+// API route 
 app.get('/api/walkers/summary', async (req, res) => {
   try {
     const [rows] = await pool.query(`

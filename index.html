@@ -109,28 +109,6 @@
       display: inline-block;
     }
 
-    /* Meaningless animated elements */
-    .floating-element {
-      position: fixed;
-      width: 50px;
-      height: 50px;
-      background-color: #f00;
-      border-radius: 50%;
-      opacity: 0.7;
-    }
-
-    #float1 { top: 10%; left: 20%; animation: float 7s infinite linear; }
-    #float2 { top: 30%; left: 70%; animation: float 5s infinite linear; }
-    #float3 { top: 60%; left: 40%; animation: float 9s infinite linear; }
-
-    @keyframes float {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      25% { transform: translate(20px, 30px) rotate(90deg); }
-      50% { transform: translate(0px, 60px) rotate(180deg); }
-      75% { transform: translate(-20px, 30px) rotate(270deg); }
-      100% { transform: translate(0, 0) rotate(360deg); }
-    }
-
     /* Form styling - elements too far apart */
     .form-container {
       margin-top: 50px;
@@ -266,11 +244,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Meaningless floating elements -->
-    <div class="floating-element" id="float1"></div>
-    <div class="floating-element" id="float2"></div>
-    <div class="floating-element" id="float3"></div>
 
     <!-- Hidden footer requires hover -->
     <footer>
