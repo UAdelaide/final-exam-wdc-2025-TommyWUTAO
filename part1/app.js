@@ -6,8 +6,8 @@ const path = require('path');
 const app = express();
 const port = 8080;
 
-// Create database connection pool
-const pool = mysql.createPool({
+// Create initial database connection pool
+let pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '',
@@ -137,8 +137,16 @@ async function initializeDatabase() {
     // Release connection
     connection.release();
 
-    // Update pool configuration to use the created database
-    pool.config.connectionConfig.database = 'DogWalkService';
+    // Create a new pool that's configured to use the DogWalkService database
+    pool = mysql.createPool({
+      host: 'localhost',
+      user: 'root',
+      password: '',
+      database: 'DogWalkService',
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+    });
 
   } catch (err) {
     console.error('Database initialization failed:', err);
