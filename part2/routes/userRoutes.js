@@ -40,7 +40,7 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // 首先检查用户是否存在
+    // Check if user exists and get their data
     const [rows] = await db.query(`
       SELECT user_id, username, role, password_hash FROM Users
       WHERE email = ?
@@ -50,11 +50,12 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // 检查密码是否匹配
+    // Check if password matches
     const user = rows[0];
-    const expectedPassword = 'hashedpassword' + email.charAt(0) + '23456789'.charAt(email.charAt(0).charCodeAt(0) % 8);
 
-    if (user.password_hash !== expectedPassword) {
+    // For demo purposes, we're accepting both the actual password_hash value
+    // and the password without "hashed" prefix
+    if (user.password_hash !== password && user.password_hash !== 'hashed' + password) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
