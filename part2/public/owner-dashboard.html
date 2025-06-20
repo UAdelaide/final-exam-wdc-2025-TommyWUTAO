@@ -11,7 +11,7 @@
   <div id="app" class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1 class="text-primary">Owner Dashboard</h1>
-      <button type="button" @click="logout" class="btn btn-outline-danger">登出</button>
+      <button type="button" @click="logout" class="btn btn-outline-danger">Logout</button>
     </div>
 
     <!-- Walk request form -->
@@ -112,7 +112,7 @@
               dogs.value = await res.json();
             }
           } catch (err) {
-            error.value = '获取狗列表失败';
+            error.value = 'Failed to load dog list';
           }
         }
 
@@ -156,7 +156,7 @@
             await fetch('/api/users/logout', { method: 'POST' });
             window.location.href = 'index.html';
           } catch (err) {
-            error.value = '登出失败';
+            error.value = 'Logout failed';
           }
         }
 
