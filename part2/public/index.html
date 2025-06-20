@@ -10,12 +10,9 @@
 <body class="bg-light">
 
   <div id="app" class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1 class="text-primary">{{ message }}</h1>
-      <a href="dog-gallery.html" class="btn btn-outline-info">View Dog Gallery</a>
-    </div>
+    <h1 class="mb-4 text-primary">{{ message }}</h1>
 
-    <div class="card shadow-sm mx-auto" style="max-width: 400px;">
+    <div class="card shadow-sm mx-auto mb-5" style="max-width: 400px;">
       <div class="card-body">
         <form @submit.prevent="login">
           <div class="mb-3">
@@ -31,21 +28,112 @@
         <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div>
       </div>
     </div>
+
+    <!-- All Registered Dogs Section -->
+    <h2 class="mb-4">All Registered Dogs</h2>
+
+    <!-- Loading indicator -->
+    <div v-if="loading" class="text-center mb-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Dogs table -->
+    <div v-if="!loading" class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Dog ID</th>
+            <th>Name</th>
+            <th>Size</th>
+            <th>Owner ID</th>
+            <th>Photo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="dog in dogs" :key="dog.dog_id">
+            <td>{{ dog.dog_id }}</td>
+            <td>{{ dog.name }}</td>
+            <td>{{ dog.size }}</td>
+            <td>{{ dog.owner_id }}</td>
+            <td><img :src="dog.imageUrl" alt="Dog photo" style="width: 100px; height: 100px; object-fit: cover;"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script>
-    const { createApp } = Vue;
+    const { createApp, ref, onMounted } = Vue;
+
     createApp({
-      data() {
-        return {
-          message: 'Welcome to the Dog Walking Service!',
-          username: '',
-          password: '',
-          error: ''
-        };
-      },
-      methods: {
-        async login() {
+      setup() {
+        const message = ref('Welcome to the Dog Walking Service!');
+        const username = ref('');
+        const password = ref('');
+        const error = ref('');
+        const dogs = ref([]);
+        const loading = ref(true);
+
+        // Function to get a random dog image by breed
+        async function getRandomDogImage(breed) {
+          try {
+            // If breed is specified, try to get breed-specific image
+            let url = 'https://dog.ceo/api/breeds/image/random';
+            if (breed && typeof breed === 'string') {
+              // Convert breed name to format used by the API
+              const formattedBreed = breed.toLowerCase().replace(/\s+/g, '/');
+              try {
+                const breedRes = await fetch(`https://dog.ceo/api/breed/${formattedBreed}/images/random`);
+                const breedData = await breedRes.json();
+                if (breedData.status === 'success') {
+                  return breedData.message;
+                }
+              } catch (err) {
+                // If breed-specific image fails, fall back to random image
+                console.log(`Couldn't find image for breed: ${breed}, using random image`);
+              }
+            }
+
+            // Fallback to random image
+            const res = await fetch(url);
+            const data = await res.json();
+            return data.message;
+          } catch (err) {
+            console.error('Error fetching dog image:', err);
+            // Return a placeholder image if API fails
+            return 'https://via.placeholder.com/100x100?text=No+Image';
+          }
+        }
+
+        // Function to load all dogs
+        async function loadDogs() {
+          try {
+            loading.value = true;
+
+            const res = await fetch('/api/dogs');
+            if (!res.ok) {
+              throw new Error('Failed to fetch dogs');
+            }
+
+            const dogsData = await res.json();
+
+            // Add random dog images to each dog
+            const dogsWithImages = await Promise.all(dogsData.map(async (dog) => {
+              dog.imageUrl = await getRandomDogImage(dog.breed);
+              return dog;
+            }));
+
+            dogs.value = dogsWithImages;
+          } catch (err) {
+            console.error('Error loading dogs:', err);
+          } finally {
+            loading.value = false;
+          }
+        }
+
+        async function login() {
           try {
             const response = await fetch('/api/users/login', {
               method: 'POST',
@@ -53,15 +141,15 @@
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                email: this.username, // Using username field
-                password: this.password
+                email: username.value,
+                password: password.value
               })
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-              this.error = data.error || 'Login failed';
+              error.value = data.error || 'Login failed';
               return;
             }
 
@@ -71,13 +159,27 @@
             } else if (data.user.role === 'walker') {
               window.location.href = 'walker-dashboard.html';
             } else {
-              this.error = 'Unknown user role';
+              error.value = 'Unknown user role';
             }
           } catch (err) {
-            this.error = 'Login request failed';
+            error.value = 'Login request failed';
             console.error(err);
           }
         }
+
+        onMounted(() => {
+          loadDogs();
+        });
+
+        return {
+          message,
+          username,
+          password,
+          error,
+          dogs,
+          loading,
+          login
+        };
       }
     }).mount('#app');
   </script>
