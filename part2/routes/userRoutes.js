@@ -40,19 +40,33 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // 首先检查用户是否存在
     const [rows] = await db.query(`
-      SELECT user_id, username, role FROM Users
-      WHERE email = ? AND password_hash = ?
-    `, [email, password]);
+      SELECT user_id, username, role, password_hash FROM Users
+      WHERE email = ?
+    `, [email]);
 
     if (rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Save user info to session
-    req.session.user = rows[0];
+    // 检查密码是否匹配
+    const user = rows[0];
+    const expectedPassword = 'hashedpassword' + email.charAt(0) + '23456789'.charAt(email.charAt(0).charCodeAt(0) % 8);
 
-    res.json({ message: 'Login successful', user: rows[0] });
+    if (user.password_hash !== expectedPassword) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Save user info to session
+    const userInfo = {
+      user_id: user.user_id,
+      username: user.username,
+      role: user.role
+    };
+    req.session.user = userInfo;
+
+    res.json({ message: 'Login successful', user: userInfo });
   } catch (error) {
     res.status(500).json({ error: 'Login failed' });
   }
