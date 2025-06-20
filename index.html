@@ -197,8 +197,10 @@
             <img v-if="dogImage" :src="dogImage">
           </div>
 
+          <!-- Button too small to click easily -->
           <div class="tiny-button" @click="getDogImage" title="Get New Dog"></div>
 
+          <!-- Randomly scattered info boxes, too much information -->
           <div class="info-box" id="info1">
             <p><span class="moving-text">Dog Breed:</span> <span class="shadow-text">{{ dogBreed }}</span></p>
             <p>Temperament: Friendly, Active, Playful, Energetic, Curious</p>
@@ -221,9 +223,11 @@
             <p>For more information about this dog breed, please contact our expert team of dog specialists who have years of experience working with various dog breeds including this particular one. We can provide detailed information about care, training methods, dietary requirements and healthcare needs.</p>
           </div>
 
+          <!-- Hard-to-distinguish low contrast button -->
           <button class="action-button" @click="bookWalk">Book a Walk</button>
         </div>
 
+        <!-- Form elements scattered without proper structure -->
         <div class="form-container">
           <input type="text" id="name" autocomplete="off">
           <label for="email">Your Email</label>
