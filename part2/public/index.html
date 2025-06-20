@@ -26,6 +26,14 @@
           <button type="submit" class="btn btn-primary">Log In</button>
         </form>
         <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div>
+
+        <div class="mt-3">
+          <small class="text-muted">Available accounts:</small>
+          <ul class="small text-muted mb-0">
+            <li><strong>Owner:</strong> alice123 / hashed123</li>
+            <li><strong>Walker:</strong> bobwalker / hashed456</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
