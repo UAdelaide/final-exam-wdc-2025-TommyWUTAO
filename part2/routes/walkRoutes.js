@@ -41,6 +41,16 @@ router.post('/:id/apply', async (req, res) => {
   const { walker_id } = req.body;
 
   try {
+    // 检查这个遛狗人是否已经申请过这个请求
+    const [existing] = await db.query(`
+      SELECT * FROM WalkApplications
+      WHERE request_id = ? AND walker_id = ?
+    `, [requestId, walker_id]);
+
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'You have already applied for this walk request' });
+    }
+
     await db.query(`
       INSERT INTO WalkApplications (request_id, walker_id)
       VALUES (?, ?)
