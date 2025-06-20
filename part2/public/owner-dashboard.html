@@ -28,7 +28,7 @@
         <h1>Owner Dashboard</h1>
         <div>
           <span class="me-3">Welcome, {{ user.username }}</span>
-          <button @click="logout" class="btn btn-outline-danger">Logout</button>
+          <button type="button" @click="logout" class="btn btn-outline-danger">Logout</button>
         </div>
       </div>
 
@@ -90,6 +90,7 @@
                     </div>
                     <div>
                       <button
+                        type="button"
                         v-if="walk.status === 'pending'"
                         @click="deleteWalk(walk.walk_id)"
                         class="btn btn-sm btn-danger"
