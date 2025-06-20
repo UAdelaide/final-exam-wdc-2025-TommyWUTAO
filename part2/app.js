@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '/public')));
 app.use(session({
-  secret: 'dog-walking-secret',
+  secret: process.env.SESSION_SECRET || 'dog-walking-secret',
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 1 day
