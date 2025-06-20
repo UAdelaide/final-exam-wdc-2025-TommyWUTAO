@@ -28,7 +28,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// GET current user session
 router.get('/me', (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: 'Not logged in' });
@@ -36,48 +35,24 @@ router.get('/me', (req, res) => {
   res.json(req.session.user);
 });
 
-// POST login with session support
+// POST login (dummy version)
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
   try {
-    // Note: In a production environment, passwords should be hashed
     const [rows] = await db.query(`
       SELECT user_id, username, role FROM Users
-      WHERE username = ? AND password_hash = ?
-    `, [username, password]);
+      WHERE email = ? AND password_hash = ?
+    `, [email, password]);
 
     if (rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Store user in session
-    req.session.user = rows[0];
-
-    // Return user info with redirect path based on role
-    const redirectPath = rows[0].role === 'owner'
-      ? '/owner-dashboard.html'
-      : '/walker-dashboard.html';
-
-    res.json({
-      message: 'Login successful',
-      user: rows[0],
-      redirectPath
-    });
+    res.json({ message: 'Login successful', user: rows[0] });
   } catch (error) {
-    console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
   }
-});
-
-// Logout route
-router.post('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      return res.status(500).json({ error: 'Logout failed' });
-    }
-    res.json({ message: 'Logout successful' });
-  });
 });
 
 module.exports = router;
