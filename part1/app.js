@@ -11,7 +11,6 @@ const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'DogWalkService',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -111,15 +110,15 @@ async function insertTestData(connection) {
 // Initialize database function
 async function initializeDatabase() {
   try {
+    // Connect to MySQL without specifying database
+    const connection = await pool.getConnection();
+
     // Read SQL file content
     const sqlFilePath = path.join(__dirname, 'dogwalks.sql');
     const sqlScript = fs.readFileSync(sqlFilePath, 'utf8');
 
     // Split SQL statements
     const sqlStatements = sqlScript.split(';').filter((statement) => statement.trim());
-
-    // Create connection
-    const connection = await pool.getConnection();
 
     // Execute each SQL statement
     for (const statement of sqlStatements) {
@@ -129,11 +128,18 @@ async function initializeDatabase() {
     }
     console.log('Database initialized');
 
+    // Use the DogWalkService database
+    await connection.query('USE DogWalkService');
+
     // Insert test data
     await insertTestData(connection);
 
     // Release connection
     connection.release();
+
+    // Update pool configuration to use the created database
+    pool.config.connectionConfig.database = 'DogWalkService';
+
   } catch (err) {
     console.error('Database initialization failed:', err);
     process.exit(1);
