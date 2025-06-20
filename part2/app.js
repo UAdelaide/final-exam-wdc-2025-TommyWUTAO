@@ -1,8 +1,17 @@
 const express = require('express');
 const path = require('path');
+const session = require('express-session');
 require('dotenv').config();
 
 const app = express();
+
+// Session middleware
+app.use(session({
+  secret: 'dogwalk-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+}));
 
 // Middleware
 app.use(express.json());
