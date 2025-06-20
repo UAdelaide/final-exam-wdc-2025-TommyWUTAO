@@ -16,7 +16,7 @@
       <div class="card-body">
         <form @submit.prevent="login">
           <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
+            <label for="username" class="form-label">Email</label>
             <input type="text" class="form-control" id="username" v-model="username" required>
           </div>
           <div class="mb-3">
@@ -26,6 +26,14 @@
           <button type="submit" class="btn btn-primary">Log In</button>
         </form>
         <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div>
+
+        <div class="mt-3">
+          <small class="text-muted">Demo Accounts:</small>
+          <ul class="small text-muted mb-0">
+            <li>Owner: jane@example.com / password123</li>
+            <li>Walker: mike@example.com / password456</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
