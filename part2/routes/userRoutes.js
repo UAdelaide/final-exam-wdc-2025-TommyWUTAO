@@ -40,11 +40,11 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Check if user exists by email or username
+    // Check if user exists by username only
     const [rows] = await db.query(`
       SELECT user_id, username, role, password_hash FROM Users
-      WHERE email = ? OR username = ?
-    `, [email, email]);
+      WHERE username = ?
+    `, [email]);
 
     if (rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -54,8 +54,7 @@ router.post('/login', async (req, res) => {
     const user = rows[0];
 
     // For demo purposes, we're accepting both the actual password_hash value
-    // and the password without "hashed" prefix
-    if (user.password_hash !== password && user.password_hash !== 'hashed' + password) {
+    if (user.password_hash !== password) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
